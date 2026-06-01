@@ -1,6 +1,6 @@
 # mm-pipeline
 
-A modular pipeline for segmentation, tracking, and QA of mother-machine time-lapse data.
+A modular pipeline for segmentation and tracking of mother-machine time-lapse data, using deep learning for segmentation and an explicit hypothesis model pruned with dynamic programming for tracking.
 
 End-to-end example: [`notebooks/example.ipynb`](notebooks/example.ipynb) (uses bundled synthetic data in `example_data/`).
 
