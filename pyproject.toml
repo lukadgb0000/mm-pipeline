@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mm-pipeline"
+version = "0.1.0"
+description = "Mother-machine segmentation, tracking, and QA pipeline."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["numpy", "tifffile"]
+
+[project.optional-dependencies]
+features = ["pandas"]
+scoring = ["pandas", "scikit-learn", "scipy", "joblib"]
+qa = ["pandas", "scikit-learn", "joblib"]
+segmentation = ["cellpose", "scikit-image", "imageio", "tifffile"]
+review = ["napari", "imageio", "tifffile"]
+cli = ["pyyaml"]
+test = ["pytest", "pandas", "pyyaml"]
+
+[project.scripts]
+mm-pipeline = "mm_pipeline.cli.main:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"mm_pipeline.qa" = ["_models/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
