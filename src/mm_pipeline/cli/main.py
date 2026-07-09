@@ -14,7 +14,7 @@ _COMMAND_MODULES: list[tuple[str, str, str]] = [
     ("segment", "segment", "Run a segmentation backend over raw images."),
     ("seg-qc", "seg_qc", "Run headless segmentation QC checks."),
     ("approve-masks", "approve_masks", "Launch napari to review and approve masks."),
-    ("candidates", "candidates", "Generate tracking candidates from labels."),
+    ("track-generate", "track_generate", "Generate tracking candidates from labels."),
     ("featurise", "featurise", "Compute the 14 pairwise features for candidates."),
     ("score", "score", "Apply a trained scorer to featurised candidates."),
     ("qa", "qa", "Run the QA workflow: pick / detect / drop / bridge / reconstruct."),

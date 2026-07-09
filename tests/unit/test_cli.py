@@ -17,7 +17,7 @@ def test_all_subcommands_have_help(capsys):
         "segment",
         "seg-qc",
         "approve-masks",
-        "candidates",
+        "track-generate",
         "featurise",
         "score",
         "qa",

@@ -27,8 +27,8 @@ Sampler = Literal["dp", "brute_force"]
 
 
 @dataclass(frozen=True)
-class CandidatesResult:
-    """In-memory result of a ``run_candidates`` invocation"""
+class TrackGenerateResult:
+    """In-memory result of a ``run_track_generate`` invocation"""
 
     candidates_df: Any
     runs_by_dataset: dict[str, TrackingCandidateRun] = field(default_factory=dict)
@@ -69,7 +69,7 @@ def _validate_sampler_hypothesis(sampler: Sampler, hm: HypothesisModel) -> None:
         )
 
 
-def run_candidates(
+def run_track_generate(
     datasets: DatasetSpec | Sequence[DatasetSpec] | str | Path,
     *,
     tracker_params: TrackerParams | None = None,
@@ -78,7 +78,7 @@ def run_candidates(
     top_k: int = 16,
     out_path: str | Path | None = None,
     overwrite: bool = False,
-) -> CandidatesResult:
+) -> TrackGenerateResult:
     """Generate candidate (t, t+1) mappings for every adjacent pair.
 
     Parameters
@@ -126,7 +126,7 @@ def run_candidates(
     try:
         import pandas as pd
     except ImportError as exc:
-        raise RuntimeError("run_candidates requires pandas.") from exc
+        raise RuntimeError("run_track_generate requires pandas.") from exc
 
     if per_dataset_frames:
         candidates_df = pd.concat(per_dataset_frames, ignore_index=True)
@@ -145,7 +145,7 @@ def run_candidates(
 
     resolved_config = {
         "tracker": resolved_params.to_dict(),
-        "candidates": {
+        "track_generate": {
             "top_k": int(top_k),
             "sampler": str(sampler),
             "hypothesis_model": resolved_hm.to_dict(),
@@ -155,7 +155,7 @@ def run_candidates(
     written_path: Path | None = None
     if out_path is not None:
         metadata = make_run_metadata(
-            command="candidates",
+            command="track-generate",
             manifest_path=manifest_path,
             resolved_config=resolved_config,
             dataset_ids=[spec.dataset_id for spec in specs],
@@ -176,7 +176,7 @@ def run_candidates(
         )
         written_path = paths["artefact"]
 
-    return CandidatesResult(
+    return TrackGenerateResult(
         candidates_df=candidates_df,
         runs_by_dataset=runs_by_dataset,
         resolved_config=resolved_config,
@@ -184,4 +184,4 @@ def run_candidates(
     )
 
 
-__all__ = ["CandidatesResult", "run_candidates"]
+__all__ = ["TrackGenerateResult", "run_track_generate"]

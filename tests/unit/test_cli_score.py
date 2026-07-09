@@ -10,7 +10,7 @@ import pytest
 from mm_pipeline.cli.main import build_parser, main
 from mm_pipeline.config import DatasetSpec
 from mm_pipeline.features import FEATURE_COLUMNS
-from mm_pipeline.runners.candidates import run_candidates
+from mm_pipeline.runners.track_generate import run_track_generate
 from mm_pipeline.runners.featurise import run_featurise
 from mm_pipeline.runners.score import ScoreResult, run_score
 from mm_pipeline.scoring import fit_scorer, save_scorer

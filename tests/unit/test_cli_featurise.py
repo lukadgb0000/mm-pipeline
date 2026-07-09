@@ -10,7 +10,7 @@ import pytest
 from mm_pipeline.cli.main import build_parser, main
 from mm_pipeline.config import DatasetSpec, TrackerParams
 from mm_pipeline.features import FEATURE_COLUMNS, SAMPLE_META_COLUMNS, build_feature_table_for_stack
-from mm_pipeline.runners.candidates import run_candidates
+from mm_pipeline.runners.track_generate import run_track_generate
 from mm_pipeline.runners.featurise import FeaturiseResult, run_featurise
 
 
@@ -58,7 +58,7 @@ def test_cli_featurise_requires_args():
 def test_run_featurise_writes_parquet_and_run_json(tmp_path: Path):
     pd = pytest.importorskip("pandas")
     spec = _build_dataset(tmp_path)
-    cand_result = run_candidates(spec, top_k=4)
+    cand_result = run_track_generate(spec, top_k=4)
     out_path = tmp_path / "features.parquet"
 
     result = run_featurise(
@@ -89,7 +89,7 @@ def test_run_featurise_matches_build_feature_table_for_stack(tmp_path: Path):
     pd = pytest.importorskip("pandas")
     np = _np()
     spec = _build_dataset(tmp_path)
-    cand_result = run_candidates(spec, top_k=4)
+    cand_result = run_track_generate(spec, top_k=4)
 
     via_featurise = run_featurise(spec, candidates=cand_result.candidates_df)
 
@@ -114,7 +114,7 @@ def test_run_featurise_matches_build_feature_table_for_stack(tmp_path: Path):
 
 def test_run_featurise_in_memory_mode(tmp_path: Path):
     spec = _build_dataset(tmp_path)
-    cand_result = run_candidates(spec, top_k=4)
+    cand_result = run_track_generate(spec, top_k=4)
     result = run_featurise(spec, candidates=cand_result.candidates_df, out_path=None)
     assert result.output_path is None
     assert len(result.features_df) > 0
@@ -123,7 +123,7 @@ def test_run_featurise_in_memory_mode(tmp_path: Path):
 def test_run_featurise_reads_candidates_from_path(tmp_path: Path):
     spec = _build_dataset(tmp_path)
     cand_path = tmp_path / "cand.parquet"
-    run_candidates(spec, top_k=4, out_path=cand_path)
+    run_track_generate(spec, top_k=4, out_path=cand_path)
 
     result = run_featurise(spec, candidates=cand_path, out_path=None)
     assert len(result.features_df) > 0
@@ -131,7 +131,7 @@ def test_run_featurise_reads_candidates_from_path(tmp_path: Path):
 
 def test_run_featurise_overwrite_protection(tmp_path: Path):
     spec = _build_dataset(tmp_path)
-    cand_result = run_candidates(spec, top_k=4)
+    cand_result = run_track_generate(spec, top_k=4)
     out_path = tmp_path / "features.parquet"
 
     run_featurise(spec, candidates=cand_result.candidates_df, out_path=out_path)
@@ -141,7 +141,7 @@ def test_run_featurise_overwrite_protection(tmp_path: Path):
 
 def test_run_featurise_overwrite_succeeds(tmp_path: Path):
     spec = _build_dataset(tmp_path)
-    cand_result = run_candidates(spec, top_k=4)
+    cand_result = run_track_generate(spec, top_k=4)
     out_path = tmp_path / "features.parquet"
 
     run_featurise(spec, candidates=cand_result.candidates_df, out_path=out_path)
@@ -160,7 +160,7 @@ def test_run_featurise_unknown_dataset_raises(tmp_path: Path):
     spec_a = _build_dataset(sub_a)
     spec_b = DatasetSpec(dataset_id="trench_other", labels_dir=sub_a / "labels")
 
-    cand_result = run_candidates(spec_a, top_k=4)
+    cand_result = run_track_generate(spec_a, top_k=4)
     # Use a manifest that doesn't include 'trench_x' (the dataset in the candidates).
     with pytest.raises(ValueError, match="not in manifest"):
         run_featurise([spec_b], candidates=cand_result.candidates_df)

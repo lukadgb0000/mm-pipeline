@@ -10,7 +10,7 @@ import pytest
 from mm_pipeline.cli.main import build_parser, main
 from mm_pipeline.config import DatasetSpec, QAConfig
 from mm_pipeline.features import FEATURE_COLUMNS
-from mm_pipeline.runners.candidates import run_candidates
+from mm_pipeline.runners.track_generate import run_track_generate
 from mm_pipeline.runners.featurise import run_featurise
 from mm_pipeline.runners.qa import QAResult, run_qa
 
@@ -56,7 +56,7 @@ def test_run_qa_dp_baseline_with_candidates(tmp_path: Path):
     """Default QAConfig + candidates input → DP baseline lineage."""
 
     spec = _build_dataset(tmp_path)
-    cand = run_candidates(spec, top_k=4)
+    cand = run_track_generate(spec, top_k=4)
 
     result = run_qa(spec, candidates=cand.candidates_df)
 
@@ -71,7 +71,7 @@ def test_run_qa_dp_baseline_with_candidates(tmp_path: Path):
 def test_run_qa_writes_per_dataset_outputs(tmp_path: Path):
     pd = pytest.importorskip("pandas")
     spec = _build_dataset(tmp_path)
-    cand = run_candidates(spec, top_k=4)
+    cand = run_track_generate(spec, top_k=4)
     out_dir = tmp_path / "qa_run"
 
     result = run_qa(spec, candidates=cand.candidates_df, out_dir=out_dir, run_tag="v1")
@@ -88,14 +88,14 @@ def test_run_qa_writes_per_dataset_outputs(tmp_path: Path):
 
 def test_run_qa_in_memory_mode(tmp_path: Path):
     spec = _build_dataset(tmp_path)
-    cand = run_candidates(spec, top_k=4)
+    cand = run_track_generate(spec, top_k=4)
     result = run_qa(spec, candidates=cand.candidates_df, out_dir=None)
     assert result.output_dir is None
 
 
 def test_run_qa_overwrite_protection(tmp_path: Path):
     spec = _build_dataset(tmp_path)
-    cand = run_candidates(spec, top_k=4)
+    cand = run_track_generate(spec, top_k=4)
     out_dir = tmp_path / "qa_run"
 
     run_qa(spec, candidates=cand.candidates_df, out_dir=out_dir, run_tag="v1")
@@ -105,7 +105,7 @@ def test_run_qa_overwrite_protection(tmp_path: Path):
 
 def test_run_qa_overwrite_succeeds(tmp_path: Path):
     spec = _build_dataset(tmp_path)
-    cand = run_candidates(spec, top_k=4)
+    cand = run_track_generate(spec, top_k=4)
     out_dir = tmp_path / "qa_run"
 
     run_qa(spec, candidates=cand.candidates_df, out_dir=out_dir, run_tag="v1")
@@ -118,7 +118,7 @@ def test_run_qa_overwrite_succeeds(tmp_path: Path):
 def test_run_qa_missing_required_column_dp_cost(tmp_path: Path):
     pd = pytest.importorskip("pandas")
     spec = _build_dataset(tmp_path)
-    cand = run_candidates(spec, top_k=4)
+    cand = run_track_generate(spec, top_k=4)
 
     # Drop dp_cost and try DP-baseline scoring.
     broken = cand.candidates_df.drop(columns=["dp_cost"])
@@ -128,7 +128,7 @@ def test_run_qa_missing_required_column_dp_cost(tmp_path: Path):
 
 def test_run_qa_classifier_requires_raw_score(tmp_path: Path):
     spec = _build_dataset(tmp_path)
-    cand = run_candidates(spec, top_k=4)
+    cand = run_track_generate(spec, top_k=4)
     cfg = QAConfig(within_pair_scorer="classifier")
 
     with pytest.raises(ValueError, match="raw_score"):
@@ -137,7 +137,7 @@ def test_run_qa_classifier_requires_raw_score(tmp_path: Path):
 
 def test_run_qa_bridge_enabled_requires_model_and_raw_score(tmp_path: Path):
     spec = _build_dataset(tmp_path)
-    cand = run_candidates(spec, top_k=4)
+    cand = run_track_generate(spec, top_k=4)
     cfg = QAConfig(bridge_enabled=True)
 
     # No model → raises about raw_score first (column validation happens first).
@@ -163,7 +163,7 @@ def test_run_qa_unknown_dataset_in_input_returns_no_rows(tmp_path: Path):
     """Dataset in manifest but absent from candidates → silently skipped."""
 
     spec = _build_dataset(tmp_path)
-    cand = run_candidates(spec, top_k=4)
+    cand = run_track_generate(spec, top_k=4)
 
     # Use a different DatasetSpec that doesn't match the candidates.
     spec_b = DatasetSpec(dataset_id="orphan", labels_dir=tmp_path / "labels")
@@ -173,7 +173,7 @@ def test_run_qa_unknown_dataset_in_input_returns_no_rows(tmp_path: Path):
 
 def test_run_qa_with_anomaly_detector_requires_features(tmp_path: Path):
     spec = _build_dataset(tmp_path)
-    cand = run_candidates(spec, top_k=4)
+    cand = run_track_generate(spec, top_k=4)
     cfg = QAConfig(anomaly_detector="hist_gbm_default")
 
     with pytest.raises(ValueError, match="feature columns"):
@@ -184,7 +184,7 @@ def test_run_qa_features_input_works(tmp_path: Path):
     """qa accepts a featurised parquet directly (DP baseline)."""
 
     spec = _build_dataset(tmp_path)
-    cand = run_candidates(spec, top_k=4)
+    cand = run_track_generate(spec, top_k=4)
     feat = run_featurise(spec, candidates=cand.candidates_df)
 
     result = run_qa(spec, features=feat.features_df)
@@ -193,7 +193,7 @@ def test_run_qa_features_input_works(tmp_path: Path):
 
 def test_run_qa_records_per_pair_features_when_features_present(tmp_path: Path):
     spec = _build_dataset(tmp_path)
-    cand = run_candidates(spec, top_k=4)
+    cand = run_track_generate(spec, top_k=4)
     feat = run_featurise(spec, candidates=cand.candidates_df)
 
     result = run_qa(spec, features=feat.features_df)

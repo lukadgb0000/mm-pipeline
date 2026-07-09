@@ -11,7 +11,7 @@ from typing import Any
 
 _LAZY_EXPORTS: dict[str, tuple[str, str]] = {
     "ApproveMasksResult": (".approve_masks", "ApproveMasksResult"),
-    "CandidatesResult": (".candidates", "CandidatesResult"),
+    "TrackGenerateResult": (".track_generate", "TrackGenerateResult"),
     "FeaturiseResult": (".featurise", "FeaturiseResult"),
     "QAResult": (".qa", "QAResult"),
     "ScoreResult": (".score", "ScoreResult"),
@@ -19,7 +19,7 @@ _LAZY_EXPORTS: dict[str, tuple[str, str]] = {
     "SegQCResult": (".seg_qc", "SegQCResult"),
     "TrainScorerResult": (".train_scorer", "TrainScorerResult"),
     "run_approve_masks": (".approve_masks", "run_approve_masks"),
-    "run_candidates": (".candidates", "run_candidates"),
+    "run_track_generate": (".track_generate", "run_track_generate"),
     "run_featurise": (".featurise", "run_featurise"),
     "run_qa": (".qa", "run_qa"),
     "run_score": (".score", "run_score"),

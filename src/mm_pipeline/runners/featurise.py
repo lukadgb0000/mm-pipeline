@@ -175,7 +175,7 @@ def run_featurise(
     
     datasets : a DatasetSpec, a list of them, or a path to a CSV manifest.
         Used to resolve labels per dataset.
-    candidates : either a candidates DataFrame (output of ``run_candidates``)
+    candidates : either a candidates DataFrame (output of ``run_track_generate``)
         or a path to a parquet file containing one.
     tracker_params : optional TrackerParams. Defaults to package defaults.
     out_path : optional features-parquet path. When None, no files are

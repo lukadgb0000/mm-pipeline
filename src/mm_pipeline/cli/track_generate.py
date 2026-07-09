@@ -41,22 +41,22 @@ def _log_level(verbosity: int) -> int:
 
 def run(args: Namespace) -> int:
     logging.basicConfig(level=_log_level(args.verbose))
-    from mm_pipeline.runners.candidates import run_candidates
+    from mm_pipeline.runners.track_generate import run_track_generate
 
     config_data = load_yaml_config(args.config)
     tracker_params = TrackerParams.from_mapping(section(config_data, "tracker"))
 
-    candidates_section = section(config_data, "candidates")
-    hm_section = candidates_section.get("hypothesis_model") or {}
+    track_generate_section = section(config_data, "track_generate")
+    hm_section = track_generate_section.get("hypothesis_model") or {}
     if not isinstance(hm_section, dict):
-        raise ValueError("'candidates.hypothesis_model' must be a mapping.")
+        raise ValueError("'track_generate.hypothesis_model' must be a mapping.")
     hypothesis_model = HypothesisModel.from_mapping(hm_section)
 
     # CLI flag wins over config; config wins over default 16.
-    top_k = args.top_k if args.top_k != 16 else int(candidates_section.get("top_k", 16))
-    sampler = args.sampler if args.sampler != "dp" else str(candidates_section.get("sampler", "dp"))
+    top_k = args.top_k if args.top_k != 16 else int(track_generate_section.get("top_k", 16))
+    sampler = args.sampler if args.sampler != "dp" else str(track_generate_section.get("sampler", "dp"))
 
-    result = run_candidates(
+    result = run_track_generate(
         datasets=args.manifest,
         tracker_params=tracker_params,
         hypothesis_model=hypothesis_model,

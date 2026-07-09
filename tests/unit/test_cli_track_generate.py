@@ -1,4 +1,4 @@
-"""Tests for mm-pipeline candidates and run_candidates"""
+"""Tests for mm-pipeline track-generate and run_track_generate"""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ import pytest
 
 from mm_pipeline.cli.main import build_parser, main
 from mm_pipeline.config import DatasetSpec, HypothesisModel, TrackerParams
-from mm_pipeline.runners.candidates import CandidatesResult, run_candidates
+from mm_pipeline.runners.track_generate import TrackGenerateResult, run_track_generate
 
 
 def _np():
@@ -36,9 +36,9 @@ def _build_dataset(tmp_path: Path) -> DatasetSpec:
     )
 
 
-def test_cli_candidates_help_succeeds(capsys):
+def test_cli_track_generate_help_succeeds(capsys):
     try:
-        main(["candidates", "--help"])
+        main(["track-generate", "--help"])
     except SystemExit as exc:
         assert exc.code == 0
     captured = capsys.readouterr()
@@ -48,33 +48,33 @@ def test_cli_candidates_help_succeeds(capsys):
     assert "--top-k" in captured.out
 
 
-def test_cli_candidates_sampler_argparse_validates():
+def test_cli_track_generate_sampler_argparse_validates():
     parser = build_parser()
     with pytest.raises(SystemExit):
         parser.parse_args(
-            ["candidates", "--manifest", "/m.csv", "--out", "/o.parquet", "--sampler", "bogus"],
+            ["track-generate", "--manifest", "/m.csv", "--out", "/o.parquet", "--sampler", "bogus"],
         )
 
 
-def test_run_candidates_writes_parquet_and_run_json(tmp_path: Path):
+def test_run_track_generate_writes_parquet_and_run_json(tmp_path: Path):
     pd = pytest.importorskip("pandas")
     spec = _build_dataset(tmp_path)
     out_path = tmp_path / "candidates.parquet"
 
-    result = run_candidates(spec, top_k=4, out_path=out_path)
+    result = run_track_generate(spec, top_k=4, out_path=out_path)
 
-    assert isinstance(result, CandidatesResult)
+    assert isinstance(result, TrackGenerateResult)
     assert result.output_path == out_path
     assert out_path.exists()
 
     sibling = out_path.with_suffix(out_path.suffix + ".run.json")
     assert sibling.exists()
     metadata = json.loads(sibling.read_text())
-    assert metadata["command"] == "candidates"
+    assert metadata["command"] == "track-generate"
     assert metadata["dataset_ids"] == ["trench_x"]
     assert metadata["n_pairs_total"] == 2
-    assert metadata["resolved_config"]["candidates"]["sampler"] == "dp"
-    assert metadata["resolved_config"]["candidates"]["top_k"] == 4
+    assert metadata["resolved_config"]["track_generate"]["sampler"] == "dp"
+    assert metadata["resolved_config"]["track_generate"]["top_k"] == 4
 
     df = pd.read_parquet(out_path)
     assert len(df) > 0
@@ -85,75 +85,75 @@ def test_run_candidates_writes_parquet_and_run_json(tmp_path: Path):
     assert "max_shrink_pct" not in df.columns
 
 
-def test_run_candidates_in_memory_mode(tmp_path: Path):
+def test_run_track_generate_in_memory_mode(tmp_path: Path):
     spec = _build_dataset(tmp_path)
 
-    result = run_candidates(spec, top_k=4, out_path=None)
+    result = run_track_generate(spec, top_k=4, out_path=None)
     assert result.output_path is None
     assert len(result.candidates_df) > 0
     assert "trench_x" in result.runs_by_dataset
 
 
-def test_run_candidates_brute_force_raises_notimplemented(tmp_path: Path):
+def test_run_track_generate_brute_force_raises_notimplemented(tmp_path: Path):
     spec = _build_dataset(tmp_path)
     with pytest.raises(NotImplementedError, match="brute_force"):
-        run_candidates(spec, sampler="brute_force")
+        run_track_generate(spec, sampler="brute_force")
 
 
-def test_run_candidates_unknown_sampler_raises(tmp_path: Path):
+def test_run_track_generate_unknown_sampler_raises(tmp_path: Path):
     spec = _build_dataset(tmp_path)
     with pytest.raises(ValueError, match="Unknown sampler"):
-        run_candidates(spec, sampler="nonsense")  # type: ignore[arg-type]
+        run_track_generate(spec, sampler="nonsense")  # type: ignore[arg-type]
 
 
-def test_run_candidates_overwrite_protection(tmp_path: Path):
+def test_run_track_generate_overwrite_protection(tmp_path: Path):
     spec = _build_dataset(tmp_path)
     out_path = tmp_path / "candidates.parquet"
 
-    run_candidates(spec, top_k=4, out_path=out_path)
+    run_track_generate(spec, top_k=4, out_path=out_path)
     with pytest.raises(FileExistsError):
-        run_candidates(spec, top_k=4, out_path=out_path)
+        run_track_generate(spec, top_k=4, out_path=out_path)
 
 
-def test_run_candidates_overwrite_succeeds(tmp_path: Path):
+def test_run_track_generate_overwrite_succeeds(tmp_path: Path):
     spec = _build_dataset(tmp_path)
     out_path = tmp_path / "candidates.parquet"
 
-    run_candidates(spec, top_k=4, out_path=out_path)
-    result = run_candidates(spec, top_k=4, out_path=out_path, overwrite=True)
+    run_track_generate(spec, top_k=4, out_path=out_path)
+    result = run_track_generate(spec, top_k=4, out_path=out_path, overwrite=True)
     assert result.output_path == out_path
 
 
-def test_run_candidates_missing_labels_raises(tmp_path: Path):
+def test_run_track_generate_missing_labels_raises(tmp_path: Path):
     spec = DatasetSpec(
         dataset_id="orphan",
         images_dir=tmp_path,  # only images, no labels
     )
     with pytest.raises(ValueError, match="labels"):
-        run_candidates(spec)
+        run_track_generate(spec)
 
 
-def test_run_candidates_empty_list_raises():
+def test_run_track_generate_empty_list_raises():
     with pytest.raises(ValueError, match="non-empty"):
-        run_candidates([])
+        run_track_generate([])
 
 
-def test_run_candidates_unknown_hypothesis_model_raises(tmp_path: Path):
+def test_run_track_generate_unknown_hypothesis_model_raises(tmp_path: Path):
     spec = _build_dataset(tmp_path)
     with pytest.raises(ValueError, match="Unknown hypothesis model"):
-        run_candidates(
+        run_track_generate(
             spec,
             hypothesis_model=HypothesisModel.from_mapping({"name": "lysis"}),
         )
 
 
-def test_run_candidates_via_public_api():
+def test_run_track_generate_via_public_api():
     """Confirm the lazy-loaded export works."""
 
-    from mm_pipeline.runners import CandidatesResult, run_candidates  # noqa: F401
+    from mm_pipeline.runners import TrackGenerateResult, run_track_generate  # noqa: F401
 
 
-def test_run_candidates_accepts_manifest_csv(tmp_path: Path):
+def test_run_track_generate_accepts_manifest_csv(tmp_path: Path):
     """Confirm str/Path manifest input works and metadata captures path."""
 
     spec = _build_dataset(tmp_path)
@@ -163,7 +163,7 @@ def test_run_candidates_accepts_manifest_csv(tmp_path: Path):
         f"{spec.dataset_id},{spec.labels_dir},{spec.axis},{spec.open_end}\n"
     )
     out_path = tmp_path / "out.parquet"
-    result = run_candidates(manifest, top_k=4, out_path=out_path)
+    result = run_track_generate(manifest, top_k=4, out_path=out_path)
 
     sibling = out_path.with_suffix(out_path.suffix + ".run.json")
     metadata = json.loads(sibling.read_text())
