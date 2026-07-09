@@ -1,4 +1,4 @@
-"""Segmentation QA report writers"""
+"""Segmentation QC report writers"""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ import json
 from pathlib import Path
 from typing import Iterable
 
-from mm_pipeline.config import SegmentationQAFinding
+from mm_pipeline.config import SegmentationQCFinding
 
 
 REPORT_COLUMNS = [
@@ -25,7 +25,7 @@ REPORT_COLUMNS = [
 ]
 
 
-def write_qa_report_csv(findings: Iterable[SegmentationQAFinding], out_csv: str | Path) -> Path:
+def write_qc_report_csv(findings: Iterable[SegmentationQCFinding], out_csv: str | Path) -> Path:
     path = Path(out_csv)
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="") as fh:

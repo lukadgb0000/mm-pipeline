@@ -2,9 +2,9 @@ from pathlib import Path
 
 import pytest
 
-from mm_pipeline.config import SegmentationQAConfig
+from mm_pipeline.config import SegmentationQCConfig
 from mm_pipeline.io.labels import load_labels_from_folder, save_label_stack
-from mm_pipeline.segmentation_qa import (
+from mm_pipeline.segmentation_qc import (
     collect_label_image_pairs,
     default_edited_labels_dir,
     find_small_labels,
@@ -12,7 +12,7 @@ from mm_pipeline.segmentation_qa import (
     resolve_review_output_dir,
     run_basic_checks,
     save_approved_labels,
-    write_qa_report_csv,
+    write_qc_report_csv,
 )
 
 
@@ -88,7 +88,7 @@ def test_run_basic_checks_and_write_report(tmp_path: Path):
     findings = run_basic_checks(
         labels,
         "trench_a",
-        SegmentationQAConfig(min_label_size=2, cell_count_jump_threshold=2, total_area_jump_fraction=0.5),
+        SegmentationQCConfig(min_label_size=2, cell_count_jump_threshold=2, total_area_jump_fraction=0.5),
     )
 
     names = {finding.check_name for finding in findings}
@@ -97,7 +97,7 @@ def test_run_basic_checks_and_write_report(tmp_path: Path):
     assert "cell_count_jump" in names
     assert "total_area_jump" in names
 
-    out_csv = write_qa_report_csv(findings, tmp_path / "qa.csv")
+    out_csv = write_qc_report_csv(findings, tmp_path / "qa.csv")
     assert out_csv.exists()
     assert "check_name" in out_csv.read_text()
 

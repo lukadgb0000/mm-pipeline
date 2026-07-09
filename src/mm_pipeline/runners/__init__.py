@@ -16,7 +16,7 @@ _LAZY_EXPORTS: dict[str, tuple[str, str]] = {
     "QAResult": (".qa", "QAResult"),
     "ScoreResult": (".score", "ScoreResult"),
     "SegmentResult": (".segment", "SegmentResult"),
-    "SegQAResult": (".seg_qa", "SegQAResult"),
+    "SegQCResult": (".seg_qc", "SegQCResult"),
     "TrainScorerResult": (".train_scorer", "TrainScorerResult"),
     "run_approve_masks": (".approve_masks", "run_approve_masks"),
     "run_candidates": (".candidates", "run_candidates"),
@@ -24,7 +24,7 @@ _LAZY_EXPORTS: dict[str, tuple[str, str]] = {
     "run_qa": (".qa", "run_qa"),
     "run_score": (".score", "run_score"),
     "run_segment": (".segment", "run_segment"),
-    "run_seg_qa": (".seg_qa", "run_seg_qa"),
+    "run_seg_qc": (".seg_qc", "run_seg_qc"),
     "run_train_scorer": (".train_scorer", "run_train_scorer"),
 }
 

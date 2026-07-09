@@ -9,8 +9,8 @@ from .schemas import (
     RawImageDatasetSpec,
     RawImageFrame,
     SegmentationConfig,
-    SegmentationQAConfig,
-    SegmentationQAFinding,
+    SegmentationQCConfig,
+    SegmentationQCFinding,
     SegmentationRunArtifact,
     TrackerParams,
 )
@@ -26,8 +26,8 @@ __all__ = [
     "RawImageDatasetSpec",
     "RawImageFrame",
     "SegmentationConfig",
-    "SegmentationQAConfig",
-    "SegmentationQAFinding",
+    "SegmentationQCConfig",
+    "SegmentationQCFinding",
     "SegmentationRunArtifact",
     "TrackerParams",
 ]

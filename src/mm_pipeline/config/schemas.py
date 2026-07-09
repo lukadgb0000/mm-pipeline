@@ -53,7 +53,7 @@ class DatasetSpec:
     frame_interval_min: Optional[float] = None
     dataset_kind: Optional[str] = None
     segmentation_run_dir: Optional[Path] = None
-    segmentation_qa_report: Optional[Path] = None
+    segmentation_qc_report: Optional[Path] = None
     notes: Optional[str] = None
 
     def __post_init__(self) -> None:
@@ -87,7 +87,7 @@ class DatasetSpec:
             frame_interval_min=_optional_float(clean.get("frame_interval_min")),
             dataset_kind=clean.get("dataset_kind"),
             segmentation_run_dir=_optional_path(clean.get("segmentation_run_dir")),
-            segmentation_qa_report=_optional_path(clean.get("segmentation_qa_report")),
+            segmentation_qc_report=_optional_path(clean.get("segmentation_qc_report")),
             notes=clean.get("notes"),
         )
 
@@ -163,7 +163,7 @@ class SegmentationRunArtifact:
 
 
 @dataclass(frozen=True)
-class SegmentationQAFinding:
+class SegmentationQCFinding:
     dataset_id: str
     frame: Optional[int]
     severity: Literal["info", "warning", "error"]
@@ -228,7 +228,7 @@ class SegmentationConfig:
 
 
 @dataclass(frozen=True)
-class SegmentationQAConfig:
+class SegmentationQCConfig:
     min_label_size: int = int(DEFAULT_SEGMENTATION_QA_CONFIG["min_label_size"])
     cell_count_jump_threshold: int = int(DEFAULT_SEGMENTATION_QA_CONFIG["cell_count_jump_threshold"])
     total_area_jump_fraction: float = float(DEFAULT_SEGMENTATION_QA_CONFIG["total_area_jump_fraction"])
@@ -248,7 +248,7 @@ class SegmentationQAConfig:
             raise ValueError("large_area_quantile must be in [0, 1].")
 
     @classmethod
-    def from_mapping(cls, values: Mapping[str, Any]) -> "SegmentationQAConfig":
+    def from_mapping(cls, values: Mapping[str, Any]) -> "SegmentationQCConfig":
         known = {f for f in DEFAULT_SEGMENTATION_QA_CONFIG}
         typed = {str(k): v for k, v in values.items() if k in known}
         return cls(**typed)

@@ -1,10 +1,10 @@
-"""Automated segmentation QA checks"""
+"""Automated segmentation QC checks"""
 
 from __future__ import annotations
 
 from typing import Iterable
 
-from mm_pipeline.config import SegmentationQAConfig, SegmentationQAFinding
+from mm_pipeline.config import SegmentationQCConfig, SegmentationQCFinding
 
 
 def _label_counts(frame: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
@@ -33,17 +33,17 @@ def find_small_labels(labels: np.ndarray, min_size: int) -> list[tuple[int, int,
     return hits
 
 
-def check_empty_frames(labels: np.ndarray, dataset_id: str) -> list[SegmentationQAFinding]:
+def check_empty_frames(labels: np.ndarray, dataset_id: str) -> list[SegmentationQCFinding]:
     import numpy as np
 
-    findings: list[SegmentationQAFinding] = []
+    findings: list[SegmentationQCFinding] = []
     arr = np.asarray(labels)
     if arr.ndim == 2:
         arr = arr[np.newaxis, ...]
     for frame_idx, frame in enumerate(arr):
         if not np.any(frame > 0):
             findings.append(
-                SegmentationQAFinding(
+                SegmentationQCFinding(
                     dataset_id=dataset_id,
                     frame=frame_idx,
                     severity="error",
@@ -57,9 +57,9 @@ def check_empty_frames(labels: np.ndarray, dataset_id: str) -> list[Segmentation
     return findings
 
 
-def check_small_labels(labels: np.ndarray, dataset_id: str, min_size: int) -> list[SegmentationQAFinding]:
+def check_small_labels(labels: np.ndarray, dataset_id: str, min_size: int) -> list[SegmentationQCFinding]:
     return [
-        SegmentationQAFinding(
+        SegmentationQCFinding(
             dataset_id=dataset_id,
             frame=frame_idx,
             severity="warning",
@@ -78,7 +78,7 @@ def check_cell_count_jumps(
     labels: np.ndarray,
     dataset_id: str,
     threshold: int,
-) -> list[SegmentationQAFinding]:
+) -> list[SegmentationQCFinding]:
     import numpy as np
 
     if threshold <= 0:
@@ -87,12 +87,12 @@ def check_cell_count_jumps(
     if arr.ndim == 2:
         arr = arr[np.newaxis, ...]
     counts = [int(len(_label_counts(frame)[0])) for frame in arr]
-    findings: list[SegmentationQAFinding] = []
+    findings: list[SegmentationQCFinding] = []
     for frame_idx in range(1, len(counts)):
         delta = counts[frame_idx] - counts[frame_idx - 1]
         if abs(delta) > threshold:
             findings.append(
-                SegmentationQAFinding(
+                SegmentationQCFinding(
                     dataset_id=dataset_id,
                     frame=frame_idx,
                     severity="warning",
@@ -111,7 +111,7 @@ def check_total_area_jumps(
     labels: np.ndarray,
     dataset_id: str,
     threshold_fraction: float,
-) -> list[SegmentationQAFinding]:
+) -> list[SegmentationQCFinding]:
     import numpy as np
 
     if threshold_fraction <= 0:
@@ -120,13 +120,13 @@ def check_total_area_jumps(
     if arr.ndim == 2:
         arr = arr[np.newaxis, ...]
     areas = [int(np.count_nonzero(frame > 0)) for frame in arr]
-    findings: list[SegmentationQAFinding] = []
+    findings: list[SegmentationQCFinding] = []
     for frame_idx in range(1, len(areas)):
         prev = max(areas[frame_idx - 1], 1)
         frac = (areas[frame_idx] - areas[frame_idx - 1]) / prev
         if abs(frac) > threshold_fraction:
             findings.append(
-                SegmentationQAFinding(
+                SegmentationQCFinding(
                     dataset_id=dataset_id,
                     frame=frame_idx,
                     severity="warning",
@@ -147,7 +147,7 @@ def check_area_outliers(
     *,
     small_quantile: float,
     large_quantile: float,
-) -> list[SegmentationQAFinding]:
+) -> list[SegmentationQCFinding]:
     import numpy as np
 
     arr = np.asarray(labels)
@@ -164,11 +164,11 @@ def check_area_outliers(
     values = np.asarray([r[2] for r in records], dtype=float)
     low = float(np.quantile(values, small_quantile))
     high = float(np.quantile(values, large_quantile))
-    findings: list[SegmentationQAFinding] = []
+    findings: list[SegmentationQCFinding] = []
     for frame_idx, label_id, count in records:
         if count < low:
             findings.append(
-                SegmentationQAFinding(
+                SegmentationQCFinding(
                     dataset_id=dataset_id,
                     frame=frame_idx,
                     severity="info",
@@ -182,7 +182,7 @@ def check_area_outliers(
             )
         elif count > high:
             findings.append(
-                SegmentationQAFinding(
+                SegmentationQCFinding(
                     dataset_id=dataset_id,
                     frame=frame_idx,
                     severity="info",
@@ -200,10 +200,10 @@ def check_area_outliers(
 def run_basic_checks(
     labels: np.ndarray,
     dataset_id: str,
-    config: SegmentationQAConfig | None = None,
-) -> list[SegmentationQAFinding]:
-    cfg = config or SegmentationQAConfig()
-    findings: list[SegmentationQAFinding] = []
+    config: SegmentationQCConfig | None = None,
+) -> list[SegmentationQCFinding]:
+    cfg = config or SegmentationQCConfig()
+    findings: list[SegmentationQCFinding] = []
     for group in [
         check_empty_frames(labels, dataset_id),
         check_small_labels(labels, dataset_id, cfg.min_label_size),
@@ -220,6 +220,6 @@ def run_basic_checks(
     return findings
 
 
-def findings_to_rows(findings: Iterable[SegmentationQAFinding]) -> list[dict[str, object]]:
+def findings_to_rows(findings: Iterable[SegmentationQCFinding]) -> list[dict[str, object]]:
     return [finding.to_dict() for finding in findings]
     

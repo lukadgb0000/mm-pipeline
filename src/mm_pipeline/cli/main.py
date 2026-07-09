@@ -12,7 +12,7 @@ from mm_pipeline import __version__
 _COMMAND_MODULES: list[tuple[str, str, str]] = [
     # (cli command name, module name under cli/, help text)
     ("segment", "segment", "Run a segmentation backend over raw images."),
-    ("seg-qa", "seg_qa", "Run headless segmentation QA checks."),
+    ("seg-qc", "seg_qc", "Run headless segmentation QC checks."),
     ("approve-masks", "approve_masks", "Launch napari to review and approve masks."),
     ("candidates", "candidates", "Generate tracking candidates from labels."),
     ("featurise", "featurise", "Compute the 14 pairwise features for candidates."),

@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from mm_pipeline.segmentation_qa.review import review_and_approve_masks
+from mm_pipeline.segmentation_qc.review import review_and_approve_masks
 
 from ._outputs import make_run_metadata
 
@@ -38,7 +38,7 @@ def run_approve_masks(
 ) -> ApproveMasksResult:
     """Launch napari to review and approve masks for one dataset.
 
-    Wraps :func:`mm_pipeline.segmentation_qa.review.review_and_approve_masks`.
+    Wraps :func:`mm_pipeline.segmentation_qc.review.review_and_approve_masks`.
     If ``out_dir`` is omitted, edited labels are written to a sibling
     directory named ``<labels_dir>_edited``.
 

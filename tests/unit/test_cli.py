@@ -15,7 +15,7 @@ def test_all_subcommands_have_help(capsys):
 
     for cmd in [
         "segment",
-        "seg-qa",
+        "seg-qc",
         "approve-masks",
         "candidates",
         "featurise",

@@ -8,7 +8,7 @@ from mm_pipeline.config.schemas import (
     HypothesisModel,
     QAConfig,
     SegmentationConfig,
-    SegmentationQAConfig,
+    SegmentationQCConfig,
 )
 
 
@@ -85,13 +85,13 @@ def test_segmentation_config_from_mapping_applies_known_fields():
     assert cfg.use_gpu is True
 
 
-def test_segmentation_qa_config_from_mapping_empty_returns_defaults():
-    cfg = SegmentationQAConfig.from_mapping({})
-    assert cfg == SegmentationQAConfig()
+def test_segmentation_qc_config_from_mapping_empty_returns_defaults():
+    cfg = SegmentationQCConfig.from_mapping({})
+    assert cfg == SegmentationQCConfig()
 
 
-def test_segmentation_qa_config_from_mapping_applies_known_fields():
-    cfg = SegmentationQAConfig.from_mapping({
+def test_segmentation_qc_config_from_mapping_applies_known_fields():
+    cfg = SegmentationQCConfig.from_mapping({
         "min_label_size": 50,
         "small_area_quantile": 0.05,
     })

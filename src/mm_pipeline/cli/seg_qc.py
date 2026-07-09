@@ -1,18 +1,18 @@
-"""mm-pipeline seg-qa CLI handler. Headless segmentation QA checks (ie no napari GUI launch)"""
+"""mm-pipeline seg-qc CLI handler. Headless segmentation QC checks (ie no napari GUI launch)"""
 
 from __future__ import annotations
 
 import logging
 from argparse import ArgumentParser, Namespace
 
-from mm_pipeline.config import SegmentationQAConfig
+from mm_pipeline.config import SegmentationQCConfig
 
 from ._config import load_yaml_config, resolve, section
 
 
 def configure_parser(parser: ArgumentParser) -> None:
     parser.description = (
-        "Run headless segmentation QA checks over a dataset manifest. "
+        "Run headless segmentation QC checks over a dataset manifest. "
         "No napari; for interactive review use 'mm-pipeline approve-masks'."
     )
     parser.add_argument("--manifest", required=True, help="Path to a dataset manifest CSV/YAML.")
@@ -34,15 +34,15 @@ def _log_level(verbosity: int) -> int:
 
 def run(args: Namespace) -> int:
     logging.basicConfig(level=_log_level(args.verbose))
-    from mm_pipeline.runners.seg_qa import run_seg_qa
+    from mm_pipeline.runners.seg_qc import run_seg_qc
 
     config_data = load_yaml_config(args.config)
     qa_config = resolve(
-        defaults=SegmentationQAConfig(),
-        config_section=section(config_data, "seg_qa"),
+        defaults=SegmentationQCConfig(),
+        config_section=section(config_data, "seg_qc"),
     )
 
-    result = run_seg_qa(
+    result = run_seg_qc(
         datasets=args.manifest,
         config=qa_config,
         out_dir=args.out,

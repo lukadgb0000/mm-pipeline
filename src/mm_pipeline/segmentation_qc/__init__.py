@@ -1,4 +1,4 @@
-"""Segmentation QA package"""
+"""Segmentation QC package"""
 
 from .approval import save_approved_labels
 from .checks import (
@@ -10,7 +10,7 @@ from .checks import (
     find_small_labels,
     run_basic_checks,
 )
-from .reports import write_qa_report_csv
+from .reports import write_qc_report_csv
 from .review import (
     LabelImagePairing,
     collect_label_image_pairs,
@@ -37,5 +37,5 @@ __all__ = [
     "review_and_approve_masks",
     "run_basic_checks",
     "save_approved_labels",
-    "write_qa_report_csv",
+    "write_qc_report_csv",
 ]

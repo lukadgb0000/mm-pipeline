@@ -1,4 +1,4 @@
-from mm_pipeline.config import DEFAULT_TRACKER_PARAMS, SegmentationConfig, SegmentationQAConfig, TrackerParams
+from mm_pipeline.config import DEFAULT_TRACKER_PARAMS, SegmentationConfig, SegmentationQCConfig, TrackerParams
 
 
 def test_tracker_defaults_match_featuretest2_values():
@@ -26,4 +26,4 @@ def test_tracker_defaults_match_featuretest2_values():
 def test_segmentation_configs_construct_with_defaults():
     assert SegmentationConfig().backend == "cpsam"
     assert SegmentationConfig().model_type == "cpsam"
-    assert SegmentationQAConfig().min_label_size == 25
+    assert SegmentationQCConfig().min_label_size == 25
