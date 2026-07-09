@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Iterable, Sequence
+from typing import TYPE_CHECKING, Any, Iterable, Sequence
 
 from mm_pipeline.core import (
     CellInstance,
@@ -13,6 +13,9 @@ from mm_pipeline.core import (
     sort_cells_along_trench,
 )
 from mm_pipeline.qa.decisions import Action, QADecision
+
+if TYPE_CHECKING:
+    from mm_pipeline.tracking.select import SelectionResult
 
 
 def apply_ops_to_lineage(
@@ -262,6 +265,70 @@ def reconstruct_from_qa_decisions(
             continue
 
         ops = deserialize_ops_json(d.chosen_ops_json)
+        frame_a = _frame_cell_map(labels[t], axis=axis, open_end=open_end)
+        frame_b = _frame_cell_map(labels[t + 1], axis=axis, open_end=open_end)
+        next_track_id = _ensure_init(t)
+        next_track_id = apply_ops_to_lineage(
+            t, ops, frame_a, frame_b, label_to_track, next_track_id,
+            tracks_rows, events_rows, division_rows,
+            axis=axis,
+        )
+
+    return _frames(tracks_rows, events_rows, division_rows)
+
+
+def reconstruct_lineage(
+    selections: Sequence["SelectionResult"],
+    labels: Any,
+    *,
+    open_end: str = "high",
+    axis: str = "y",
+) -> tuple[Any, Any, Any]:
+    """Build (tracks, events, divisions) DataFrames from per-pair selections.
+
+    Pure KEEP/DROP reconstruction — the non-bridge path of
+    ``reconstruct_from_qa_decisions`` with bridge handling removed. Each
+    selection applies its chosen candidate's ops to extend track IDs from t to
+    t+1; a selection that is missing or has ``chosen_ops_json is None`` breaks
+    the lineage and the next frame re-initialises track IDs. It reuses the same
+    ``_init_tracks_at_frame`` / ``apply_ops_to_lineage`` primitives as ``qa``,
+    so ``track_id`` numbering is byte-identical. All drop/bridge handling lives
+    in ``modelvio``.
+    """
+
+    try:
+        import pandas as pd  # noqa: F401  (used by _frames)
+    except ImportError as exc:
+        raise RuntimeError("Lineage reconstruction requires pandas.") from exc
+
+    if labels is None or int(getattr(labels, "shape", [0])[0]) == 0:
+        return _empty_lineage()
+
+    selections_by_t: dict[int, "SelectionResult"] = {sel.t: sel for sel in selections}
+    T = int(labels.shape[0])
+
+    tracks_rows: list[dict[str, Any]] = []
+    events_rows: list[dict[str, Any]] = []
+    division_rows: list[dict[str, Any]] = []
+    label_to_track: dict[int, int] = {}
+    next_track_id = 1
+
+    def _ensure_init(t: int) -> int:
+        nonlocal next_track_id
+        if not label_to_track:
+            next_track_id = _init_tracks_at_frame(
+                labels, t, label_to_track, next_track_id, tracks_rows,
+                axis=axis, open_end=open_end,
+            )
+        return next_track_id
+
+    for t in range(T - 1):
+        sel = selections_by_t.get(t)
+        if sel is None or sel.chosen_ops_json is None:
+            label_to_track.clear()
+            continue
+
+        ops = deserialize_ops_json(sel.chosen_ops_json)
         frame_a = _frame_cell_map(labels[t], axis=axis, open_end=open_end)
         frame_b = _frame_cell_map(labels[t + 1], axis=axis, open_end=open_end)
         next_track_id = _ensure_init(t)

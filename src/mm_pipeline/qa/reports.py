@@ -5,6 +5,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Iterable
 
+from mm_pipeline.io.tracks import write_lineage_outputs  # noqa: F401  (re-export)
+
 from .decisions import QADecision
 
 
@@ -27,24 +29,3 @@ def write_qa_decisions_csv(decisions: Iterable[QADecision], path: str | Path) ->
     out_path.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(out_path, index=False)
     return out_path
-
-
-def write_lineage_outputs(
-    tracks_df,
-    events_df,
-    divisions_df,
-    out_dir: str | Path,
-) -> dict[str, Path]:
-    """Write the three lineage CSVs to out_dir and return their paths"""
-
-    out_root = Path(out_dir)
-    out_root.mkdir(parents=True, exist_ok=True)
-    paths = {
-        "tracks": out_root / "tracks.csv",
-        "events": out_root / "events.csv",
-        "divisions": out_root / "division_events.csv",
-    }
-    tracks_df.to_csv(paths["tracks"], index=False)
-    events_df.to_csv(paths["events"], index=False)
-    divisions_df.to_csv(paths["divisions"], index=False)
-    return paths
