@@ -6,9 +6,9 @@ import math
 
 import pytest
 
-from mm_pipeline.qa.aggregation import build_per_pair_features, per_pair_feature_columns
-from mm_pipeline.qa.physical_errors import (
-    HistGBMPhysicalErrorDetector,
+from mm_pipeline.modelvio.aggregation import build_per_pair_features, per_pair_feature_columns
+from mm_pipeline.modelvio.detectors import (
+    HistGBMModelViolationDetector,
     NeverAnomalous,
     build_detector,
     load_detector,
@@ -72,7 +72,7 @@ def test_train_detector_trains_and_calibrates(tmp_path):
     df["family_id"] = family_ids
 
     detector = train_detector(df, target_recall=0.9, cv_groups=df["family_id"])
-    assert isinstance(detector, HistGBMPhysicalErrorDetector)
+    assert isinstance(detector, HistGBMModelViolationDetector)
     assert 0.0 <= detector.threshold <= 1.0
     assert detector.estimator is not None
     assert detector.training_summary["n_rows"] == len(df)
@@ -86,5 +86,5 @@ def test_train_detector_trains_and_calibrates(tmp_path):
 
 
 def test_default_loader_errors_when_artifact_missing():
-    with pytest.raises(FileNotFoundError, match="Default physical-error detector"):
-        HistGBMPhysicalErrorDetector.default()
+    with pytest.raises(FileNotFoundError, match="Default model-violation detector"):
+        HistGBMModelViolationDetector.default()

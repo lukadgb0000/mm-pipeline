@@ -7,7 +7,7 @@ import math
 import pytest
 
 from mm_pipeline.features import FEATURE_COLUMNS
-from mm_pipeline.qa.aggregation import build_per_pair_features, per_pair_feature_columns
+from mm_pipeline.modelvio.aggregation import build_per_pair_features, per_pair_feature_columns
 
 
 def _pd():

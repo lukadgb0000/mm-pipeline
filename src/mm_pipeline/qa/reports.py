@@ -1,31 +1,16 @@
-"""QA decision report writers"""
+"""Re-export shim: decision report writers now live in ``modelvio/reports.py``.
+
+Kept so ``qa`` and its public API keep importing these from here unchanged.
+``write_lineage_outputs`` re-export (moved to ``io/tracks.py`` in an earlier phase)
+is preserved too. Do not add logic here.
+"""
 
 from __future__ import annotations
 
-from pathlib import Path
-from typing import Iterable
-
 from mm_pipeline.io.tracks import write_lineage_outputs  # noqa: F401  (re-export)
+from mm_pipeline.modelvio.reports import (  # noqa: F401
+    decisions_to_dataframe,
+    write_qa_decisions_csv,
+)
 
-from .decisions import QADecision
-
-
-def decisions_to_dataframe(decisions: Iterable[QADecision]):
-    try:
-        import pandas as pd
-    except ImportError as exc:
-        raise RuntimeError("decisions_to_dataframe requires pandas.") from exc
-    rows = [d.to_row() for d in decisions]
-    if not rows:
-        return pd.DataFrame()
-    return pd.DataFrame(rows)
-
-
-def write_qa_decisions_csv(decisions: Iterable[QADecision], path: str | Path) -> Path:
-    """Write a flattened QA decisions table to CSV."""
-
-    df = decisions_to_dataframe(decisions)
-    out_path = Path(path)
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    df.to_csv(out_path, index=False)
-    return out_path
+__all__ = ["decisions_to_dataframe", "write_lineage_outputs", "write_qa_decisions_csv"]

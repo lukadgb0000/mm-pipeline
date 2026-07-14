@@ -26,7 +26,7 @@ mm-pipeline = "mm_pipeline.cli.main:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-"mm_pipeline.qa" = ["_models/*"]
+"mm_pipeline.modelvio" = ["_models/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

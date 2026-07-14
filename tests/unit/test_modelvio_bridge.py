@@ -10,8 +10,8 @@ import numpy as np
 import pytest
 
 from mm_pipeline.config import DEFAULT_TRACKER_PARAMS, TrackerParams
-from mm_pipeline.qa import Action, DropReason, QADecision
-from mm_pipeline.qa.bridge import BridgeAttempt, bridge_drops
+from mm_pipeline.modelvio import Action, DropReason, QADecision
+from mm_pipeline.modelvio.bridge import BridgeAttempt, bridge_drops
 
 
 def _pd():
