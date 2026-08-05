@@ -20,6 +20,7 @@ _COMMAND_MODULES: list[tuple[str, str, str]] = [
     ("qa", "qa", "Run the QA workflow: pick / detect / drop / bridge / reconstruct."),
     ("track-select", "track_select", "Pick best candidate per pair and reconstruct tracks."),
     ("train-scorer", "train", "Train a candidate-plausibility scorer."),
+    ("analyse", "analyse", "Cycles, metrics, and swimlane/dendrogram from a reconstructed run."),
 ]
 
 

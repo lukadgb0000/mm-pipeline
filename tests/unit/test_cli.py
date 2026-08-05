@@ -22,6 +22,7 @@ def test_all_subcommands_have_help(capsys):
         "score",
         "qa",
         "train-scorer",
+        "analyse",
     ]:
         try:
             main([cmd, "--help"])
