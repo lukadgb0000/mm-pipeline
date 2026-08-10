@@ -7,6 +7,7 @@ import into ``tracking``/``features``/``core``.
 
 from __future__ import annotations
 
+from .consistency import division_length_consistency
 from .metrics import (
     PROPERTY_METRICS,
     CycleContext,
@@ -41,6 +42,7 @@ __all__ = [
     "cell_properties",
     "cycle_metric",
     "descendants_of",
+    "division_length_consistency",
     "filter_cycles",
     "generation",
     "get_cycle_metric",
