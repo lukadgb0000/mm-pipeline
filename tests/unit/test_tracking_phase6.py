@@ -115,7 +115,12 @@ def test_prefix_exit_is_allowed_only_at_open_end_prefix():
     ],
 )
 def test_division_hard_gates_return_legacy_infeasible_cost(source, dest1, dest2):
-    params = TrackerParams()
+    params = TrackerParams(
+        div_tol_sum_area=0.2,
+        div_tol_ind_area=0.2,
+        div_tol_sum_len=0.2,
+        div_tol_ind_len=0.2,
+    )
     pair = FramePair("trench_a", 0, 1, (100, 20), "y", "low")
 
     assert divide_cost(source, dest1, dest2, frame_pair=pair, params=params) == pytest.approx(
@@ -123,8 +128,25 @@ def test_division_hard_gates_return_legacy_infeasible_cost(source, dest1, dest2)
     )
 
 
-def test_solve_pair_best_preserves_legacy_infeasible_division_cost():
+def test_default_tracker_does_not_hard_gate_divisions():
     params = TrackerParams()
+    pair = FramePair("trench_a", 0, 1, (100, 20), "y", "low")
+    source = make_cell(1, 10.0, area=10.0, minr=0, maxr=10)
+    dest1 = make_cell(10, 8.0, area=20.0, minr=0, maxr=8)
+    dest2 = make_cell(11, 12.0, area=20.0, minr=8, maxr=16)
+
+    assert divide_cost(source, dest1, dest2, frame_pair=pair, params=params) < (
+        INFEASIBLE_DIVISION_COST
+    )
+
+
+def test_solve_pair_best_preserves_legacy_infeasible_division_cost():
+    params = TrackerParams(
+        div_tol_sum_area=0.2,
+        div_tol_ind_area=0.2,
+        div_tol_sum_len=0.2,
+        div_tol_ind_len=0.2,
+    )
     pair = FramePair("trench_a", 0, 1, (100, 20), "y", "low")
     source = make_cell(1, 10.0, area=10.0, minr=0, maxr=10)
     dests = [

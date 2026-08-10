@@ -3,9 +3,16 @@
 from __future__ import annotations
 
 import math
+from collections.abc import Iterable, Sequence
 
 from mm_pipeline.config import TrackerParams
-from mm_pipeline.core import CellInstance, FramePair, cell_axis_len
+from mm_pipeline.core import (
+    CellInstance,
+    FramePair,
+    TrackingOperation,
+    cell_axis_len,
+)
+from mm_pipeline.core.operations import normalize_operation
 
 EPS = 1e-9
 INFEASIBLE_DIVISION_COST = 1e9
@@ -109,3 +116,57 @@ def divide_cost(
         + (params.wsym * sym)
         - (params.w_divshrink * shrink_div)
     )
+
+
+def candidate_ops_cost(
+    cells_t: Sequence[CellInstance],
+    cells_k: Sequence[CellInstance],
+    frame_pair: FramePair,
+    params: TrackerParams,
+    ops: Iterable[TrackingOperation | Sequence[object]],
+) -> float:
+    """Evaluate one complete operation sequence with the DP's exact costs.
+
+    The cell sequences and operations use the tracker's internal open-end-first
+    order. Validation is deliberately performed here so this function is safe for
+    manual review input as well as generated candidates. Exit increments use the
+    same 1-based exit count as the DP, and link costs receive the same first
+    destination label for open-boundary shrink weighting.
+    """
+
+    from .validation import assert_ops_valid
+
+    normalised = [normalize_operation(op) for op in ops]
+    assert_ops_valid(cells_t, cells_k, normalised)
+    validate_tracker_context(frame_pair, params)
+
+    sources = {int(cell.label): cell for cell in cells_t}
+    dests = {int(cell.label): cell for cell in cells_k}
+    bottom_label_dest = cells_k[0].label if cells_k else None
+    exit_count = 0
+    total = 0.0
+
+    for op in normalised:
+        source = sources[int(op.src_label)]
+        if op.kind == "exit":
+            exit_count += 1
+            total += exit_increment(exit_count, params)
+        elif op.kind == "link":
+            assert op.dst1_label is not None
+            total += link_cost(
+                source,
+                dests[int(op.dst1_label)],
+                bottom_label_dest=bottom_label_dest,
+                frame_pair=frame_pair,
+                params=params,
+            )
+        elif op.kind == "divide":
+            assert op.dst1_label is not None and op.dst2_label is not None
+            total += divide_cost(
+                source,
+                dests[int(op.dst1_label)],
+                dests[int(op.dst2_label)],
+                frame_pair=frame_pair,
+                params=params,
+            )
+    return float(total)
