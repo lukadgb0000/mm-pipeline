@@ -17,10 +17,11 @@ DEFAULT_TRACKER_PARAMS: dict[str, Any] = {
     "wsym": 2.0,
     "w_divshrink": 10.0,
     "border_margin": 2,
-    "div_tol_sum_area": 0.2,
-    "div_tol_ind_area": 0.2,
-    "div_tol_sum_len": 0.2,
-    "div_tol_ind_len": 0.2,
+    # Division hard gates are disabled by default
+    "div_tol_sum_area": float("inf"),
+    "div_tol_ind_area": float("inf"),
+    "div_tol_sum_len": float("inf"),
+    "div_tol_ind_len": float("inf"),
 }
 
 DEFAULT_SEGMENTATION_CONFIG: dict[str, Any] = {

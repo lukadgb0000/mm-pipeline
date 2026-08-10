@@ -1,7 +1,9 @@
+import math
+
 from mm_pipeline.config import DEFAULT_TRACKER_PARAMS, SegmentationConfig, SegmentationQCConfig, TrackerParams
 
 
-def test_tracker_defaults_match_featuretest2_values():
+def test_tracker_defaults_use_legacy_costs_without_division_hard_gates():
     assert DEFAULT_TRACKER_PARAMS == {
         "wy": 0.02,
         "wa": 0.2,
@@ -15,10 +17,10 @@ def test_tracker_defaults_match_featuretest2_values():
         "wsym": 2.0,
         "w_divshrink": 10.0,
         "border_margin": 2,
-        "div_tol_sum_area": 0.2,
-        "div_tol_ind_area": 0.2,
-        "div_tol_sum_len": 0.2,
-        "div_tol_ind_len": 0.2,
+        "div_tol_sum_area": math.inf,
+        "div_tol_ind_area": math.inf,
+        "div_tol_sum_len": math.inf,
+        "div_tol_ind_len": math.inf,
     }
     assert TrackerParams().to_dict(include_extra=False) == DEFAULT_TRACKER_PARAMS
 
